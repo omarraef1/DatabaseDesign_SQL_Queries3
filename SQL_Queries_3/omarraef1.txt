@@ -1,0 +1,231 @@
+Script started on Fri 23 Oct 2020 01:58:42 AM MST
+/bin/sh: 0: Can't open .FIRST_TIME
+omarraef1@lectura:~/csc460/HW3$ echo Omar R.G. Mohamed
+Omar R.G. Mohamed
+omarraef1@lectura:~/csc460/HW3$ cat query01.sql
+/* Names of all the red fish */
+
+
+select FNAME from mccann.fish where FCOLOR = 'red';
+omarraef1@lectura:~/csc460/HW3$ cat query02.sql
+/* Colors of lagoon tanks */
+
+select TCOLOR from mccann.tank where TNAME = 'lagoon';
+omarraef1@lectura:~/csc460/HW3$ cat query03.sql
+/* Cartesian Product of species name vs tank name with each pair listed only once */
+
+select distinct SNAME, TNAME from mccann.species cross join mccann.tank;
+omarraef1@lectura:~/csc460/HW3$ cat query04.sql
+/* Colors of sharks in alphabetical order */
+
+select FCOLOR from mccann.fish join mccann.species on mccann.fish.SNO = mccann.species.SNO where mccann.species.SNAME = 'shark' order by FCOLOR asc;
+omarraef1@lectura:~/csc460/HW3$ cat query05.sql
+/* Name of the heaviest fish */
+
+select FNAME from mccann.fish where mccann.fish.FWEIGHT = (select max(FWEIGHT) from mccann.fish);
+omarraef1@lectura:~/csc460/HW3$ cat query06.sql
+/* names of sharks living in cesspools */
+
+select FNAME from mccann.fish join mccann.species on mccann.fish.SNO = mccann.species.SNO join mccann.tank on mccann.fish.TNO = mccann.tank.TNO where mccann.species.SNAME = 'shark' and mccann.tank.TNAME = 'cesspool';
+
+omarraef1@lectura:~/csc460/HW3$ cat query07.sql
+/* Display listing of species tanks and fish names */
+
+select distinct SNAME as NAMES from mccann.species union select distinct TNAME as NAMES from mccann.tank union select distinct FNAME as NAMES from mccann.fish;
+omarraef1@lectura:~/csc460/HW3$ cat query08.sql
+/* Names of species found in puddles */
+
+select distinct SNAME from mccann.species join mccann.fish on mccann.species.SNO = mccann.fish.SNO join mccann.tank on mccann.fish.TNO = mccann.tank.TNO where mccann.tank.TNAME = 'puddle';
+
+omarraef1@lectura:~/csc460/HW3$ cat query09.sql
+/* Species found in same tanks as sharks, Including Shark species from returned table */
+
+select distinct mccann.species.SNAME from mccann.species join mccann.fish on mccann.species.SNO = mccann.fish.SNO join ( select distinct mccann.tank.TNO as t2 from mccann.tank join mccann.fish on mccann.tank.TNO = mccann.fish.TNO join mccann.species on mccann.fish.SNO = mccann.species.SNO where mccann.species.SNAME = 'shark' ) on mccann.fish.TNO = t2;
+omarraef1@lectura:~/csc460/HW3$ cat query0[K10.sql
+/* Names of fish born and swimming */
+
+select mccann.fish.FNAME from mccann.fish join ( select mccann.event.FNO as e1 from mccann.event join ( select mccann.fish.FNO as f1 from mccann.fish join mccann.event on mccann.fish.FNO = mccann.event.FNO where mccann.event.ENOTE = 'Born' ) on mccann.event.FNO = f1 where mccann.event.ENOTE = 'Swimming' ) on mccann.fish.FNO = e1;
+omarraef1@lectura:~/csc460/HW3$ cat query11.sql
+/* Names of fish born but not swimming */
+
+select mccann.fish.FNAME from mccann.fish join mccann.event on mccann.fish.FNO = mccann.event.FNO where mccann.event.ENOTE = 'Born' minus select mccann.fish.FNAME from mccann.fish join ( select mccann.event.FNO as e1 from mccann.event join ( select mccann.fish.FNO as f1 from mccann.fish join mccann.event on mccann.fish.FNO = mccann.event.FNO where mccann.event.ENOTE = 'Born' ) on mccann.event.FNO = f1 where mccann.event.ENOTE = 'Swimming' ) on mccann.fish.FNO = e1;
+omarraef1@lectura:~/csc460/HW3$ cat query12.sql
+/* Colors of fish and their average weights for weights less than 40 in descending order */
+
+select FCOLOR, AVGW from ( select FCOLOR, avg(FWEIGHT) as avgw from mccann.fish group by FCOLOR ) where avgw < 40 order by AVGW desc;
+omarraef1@lectura:~/csc460/HW3$ cat query13.sql
+/* Names of species that eat herring and are present in green tanks */
+
+select mccann.species.SNAME from mccann.species join ( select mccann.species.SNO as s1 from mccann.species where mccann.species.SFOOD = 'herring' or mccann.species.SFOOD = 'anything' intersect select mccann.fish.SNO from mccann.fish join ( select mccann.tank.TNO as t1 from mccann.tank where mccann.tank.TCOLOR = 'green' ) on mccann.fish.TNO = t1 ) on mccann.species.SNO = s1;
+omarraef1@lectura:~/csc460/HW3$ sqlpl omarraef1@oracle.aloe
+
+SQL*Plus: Release 11.2.0.3.0 Production on Fri Oct 23 02:01:53 2020
+
+Copyright (c) 1982, 2011, Oracle.  All rights reserved.
+
+Enter password: 
+
+Connected to:
+Oracle Database 11g Enterprise Edition Release 11.2.0.3.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
+
+SQL> @ query01
+
+FNAME
+----------
+albert
+george
+jill
+kilroy
+
+SQL> @ query02
+
+TCOLOR
+------
+red
+green
+
+SQL> @ query03
+
+SNAME	   TNAME
+---------- ----------
+shark	   puddle
+shark	   cesspool
+shark	   lagoon
+shark	   beach
+guppy	   lagoon
+dolphin    beach
+dolphin    lagoon
+guppy	   puddle
+guppy	   cesspool
+dolphin    cesspool
+dolphin    puddle
+
+SNAME	   TNAME
+---------- ----------
+guppy	   beach
+
+12 rows selected.
+
+SQL> @ query04
+
+FCOLOR
+------
+blue
+orange
+purple
+red
+white
+white
+white
+
+7 rows selected.
+
+SQL> @ query05
+
+FNAME
+----------
+darron
+
+SQL> @ query06
+
+FNAME
+----------
+darron
+george
+elsie
+killer
+bonnie
+charlie
+
+6 rows selected.
+
+SQL> @ query07
+
+NAMES
+----------
+albert
+beach
+bonnie
+cesspool
+charlie
+cory
+darron
+dolphin
+elsie
+flipper
+fran
+
+NAMES
+----------
+george
+guppy
+helen
+indira
+jill
+killer
+kilroy
+lagoon
+laura
+maureen
+puddle
+
+NAMES
+----------
+shark
+
+23 rows selected.
+
+SQL> @ query08
+
+SNAME
+----------
+dolphin
+guppy
+
+SQL> @ query09
+
+SNAME
+----------
+shark
+dolphin
+guppy
+
+SQL> @ query10
+
+FNAME
+----------
+flipper
+
+SQL> @ query11
+
+FNAME
+----------
+albert
+indira
+jill
+laura
+maureen
+
+SQL> @ query12
+
+FCOLOR	     AVGW
+------ ----------
+red	    38.75
+black	       35
+orange	     19.5
+purple	       12
+
+SQL> @ query12 3
+
+SNAME
+----------
+dolphin
+
+SQL> exit
+Disconnected from Oracle Database 11g Enterprise Edition Release 11.2.0.3.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
+omarraef1@lectura:~/csc460/HW3$ exit
+exit
+
+Script done on Fri 23 Oct 2020 02:03:25 AM MST
